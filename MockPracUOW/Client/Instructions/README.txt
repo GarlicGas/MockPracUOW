@@ -11,6 +11,8 @@ IN CASE OF CRISIS, FOLLOW LAB AND GOOGLE
 
 dont tell anyone about the trees or the vietcong will spike your ass.
 
+REMEMBER TO ADD WEEK 6 PAGE 12 IN AREAS
+
 Very important instruction manual, read this and you will be fine, trust me.
 Step 1: Create entities in .shared in Domain folder
 Step 2: Copy and paste controllers from your lab exercises then CTRL+H some stuff -- there are comments in the taskcontroller to help you
