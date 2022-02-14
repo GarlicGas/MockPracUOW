@@ -1,0 +1,51 @@
+﻿@*EDIT THE FIELDS HERE*@
+
+<EditForm Model="@task" OnValidSubmit="@OnValidSubmit">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<fieldset disabled="@Disabled">
+		<div class="form-group">
+			<label>Task Name: </label>
+			<div>
+				<InputText @bind-Value="@task.TaskName" class="form-control" />
+				<ValidationMessage For="@(()=>task.TaskName)" />
+			</div>
+		</div>
+	</fieldset>
+	<fieldset disabled="@Disabled">
+		<div class="form-group">
+			<label>Completion Status: </label>
+			<div>
+				<InputCheckbox @bind-Value="@task.IsCompleted" class="form-control" />
+				<ValidationMessage For="@(()=>task.IsCompleted)" />
+			</div>
+		</div>
+	</fieldset>
+	<fieldset disabled="@Disabled">
+		<div class="form-group">
+			<label>Due Date: </label>
+			<div>
+				<InputDate @bind-Value="@task.DueDate" class="form-control" />
+				<ValidationMessage For="@(()=>task.DueDate)" />
+			</div>
+		</div>
+	</fieldset>
+
+	@if (!Disabled)
+	{
+		<button type="submit" class="btn btn-success btn-block">
+			@ButtonText
+		</button>
+	}
+	<BackToList Target="tasks" />
+</EditForm>
+
+
+@code {
+	//EDIT THE PARAMETERS HERE
+	[Parameter] public bool Disabled { get; set; } = false;
+	[Parameter] public MockPracUOW.Shared.Domain.Task task { get; set; }
+	[Parameter] public string ButtonText { get; set; } = "Save";
+	[Parameter] public EventCallback OnValidSubmit { get; set; }
+}

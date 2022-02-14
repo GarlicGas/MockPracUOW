@@ -1,0 +1,20 @@
+﻿@page "/tasks/view/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+
+<h3>View</h3>
+
+
+<FormComponent task="task" Disabled="true" />
+
+
+@code {
+	[Parameter] public int id { get; set; }
+	MockPracUOW.Shared.Domain.Task task = new MockPracUOW.Shared.Domain.Task();
+	protected async override System.Threading.Tasks.Task OnParametersSetAsync()
+	{
+		task = await
+		_client.GetFromJsonAsync<MockPracUOW.Shared.Domain.Task>($"{Endpoints.TasksEndpoint}/{id}");
+	}
+}

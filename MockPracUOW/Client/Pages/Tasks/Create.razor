@@ -1,0 +1,56 @@
+﻿@page "/tasks/create"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
+@inject NavigationManager _navManager
+
+<h3>Creating your Task</h3>
+
+<br />
+
+<FormComponent ButtonText="Create Task" task="task" OnValidSubmit="@CreateProfileData" />
+
+@code {
+	MockPracUOW.Shared.Domain.Task task = new MockPracUOW.Shared.Domain.Task();
+	private List<MockPracUOW.Shared.Domain.Task> Tasks;
+
+	private List<AppUser> AppUsers;
+	private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+	private string _currentUserName;
+
+	protected async override System.Threading.Tasks.Task OnInitializedAsync() // KEEP THIS LINE INTACT OR YOU WILL DIE!!!!!!!
+	{
+		Tasks = await _client.GetFromJsonAsync<List<MockPracUOW.Shared.Domain.Task>>($"{Endpoints.TasksEndpoint}");
+		AppUsers = await _client.GetFromJsonAsync<List<AppUser>>($"{Endpoints.AccountsEndpoint}");
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+
+		if (user.Identity.IsAuthenticated)
+		{
+			_claims = user.Claims;
+			//_currentUserName = user.Identity.Name;
+			if (_claims.Count() > 0)
+			{
+				foreach (var claim in _claims)
+				{
+					if (claim.Type == "name")
+					{
+						_currentUserName = claim.Value;
+						continue;
+					}
+				}
+			}
+		}
+	}
+
+	private async System.Threading.Tasks.Task CreateProfileData()
+	{
+		//you know what to do here
+		await _client.PostAsJsonAsync(Endpoints.TasksEndpoint, task);
+		_navManager.NavigateTo("/tasks/");
+	}
+
+}

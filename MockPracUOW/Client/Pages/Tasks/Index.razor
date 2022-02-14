@@ -1,0 +1,102 @@
+﻿@page "/tasks/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
+
+<a href="/tasks/create" class="btn btn-secondary">
+	<span class="oi oi-plus"></span>
+	Create a task
+</a>
+
+
+@if (Tasks == null)
+{
+	<div class="alert alert-info">Loading your tasks..</div>
+}
+else
+{
+	@*Edit the display accordingly*@
+	<table class="table table-responsive">
+		<thead>
+			<tr>
+				<th>Task Name</th>
+				<th>Completion Status</th>
+				<th>Created Date</th>
+				<th>Due Date</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var task in Tasks)
+			{
+				@if (task.CreatedBy == _currentUserName) @*This if function checks if the item is created by the user, which will display to the user who created it, only delete if not required*@
+				{
+					<tr>
+						<td>@task.TaskName</td>
+						<td>@task.IsCompleted</td>
+						<td>@task.DateCreated</td>
+						<td>@task.DueDate</td>
+						<td>
+							<a href="/tasks/view/@task.Id" class="btn btn-primary">
+								<span class="oi oi-book"></span>
+							</a>
+							<a href="/tasks/edit/@task.Id" class="btn btn-warning">
+								<span class="oi oi-pencil"></span>
+							</a>
+							<button class="btn btn-danger" @onclick="@(()=>Delete(task.Id))">
+								<span class="oi oi-delete"></span>
+							</button>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}
+
+
+@code {
+	private List<MockPracUOW.Shared.Domain.Task> Tasks;
+	private List<AppUser> AppUsers;
+	private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+	private string _currentUserName;
+
+	protected async override System.Threading.Tasks.Task OnInitializedAsync()
+	{
+		Tasks = await _client.GetFromJsonAsync<List<MockPracUOW.Shared.Domain.Task>>($"{Endpoints.TasksEndpoint}");
+		AppUsers = await _client.GetFromJsonAsync<List<AppUser>>($"{Endpoints.AccountsEndpoint}");
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			_claims = user.Claims;
+			//_currentUserName = user.Identity.Name;
+			if (_claims.Count() > 0)
+			{
+				foreach (var claim in _claims)
+				{
+					if (claim.Type == "name")
+					{
+						_currentUserName = claim.Value;
+						continue;
+					}
+				}
+			}
+		}
+	}
+
+
+	async System.Threading.Tasks.Task Delete(int profileId)
+	{
+		var task = Tasks.First(q => q.Id == profileId);
+		var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete your task?");
+		if (confirm)
+		{
+			await _client.DeleteAsync($"{Endpoints.TasksEndpoint}/{profileId}");
+			await OnInitializedAsync();
+		}
+	}
+}

@@ -1,0 +1,25 @@
+﻿@page "/tasks/edit/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+@inject IJSRuntime js
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
+
+<FormComponent ButtonText="Update Task" task="task" OnValidSubmit="@EditTaskData" />
+
+	@code {
+		[Parameter] public int id { get; set; }
+		MockPracUOW.Shared.Domain.Task task = new MockPracUOW.Shared.Domain.Task();
+
+		protected async override System.Threading.Tasks.Task OnParametersSetAsync()
+		{
+			task = await _client.GetFromJsonAsync<MockPracUOW.Shared.Domain.Task>($"{Endpoints.TasksEndpoint}/{id}");
+		}
+
+		async System.Threading.Tasks.Task EditTaskData() //KEEP THIS LINE INTACT
+		{
+			await _client.PutAsJsonAsync<MockPracUOW.Shared.Domain.Task>($"{Endpoints.TasksEndpoint}/{id}", task);
+			_navManager.NavigateTo("/tasks/");
+		}
+	}
